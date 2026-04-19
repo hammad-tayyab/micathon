@@ -1,3 +1,9 @@
+/**
+ * App.tsx
+ * This is the main starting point of the application.
+ * It checks if the user is logged in. If they are, it shows the main dashboard.
+ * If they are not, it shows the login screen. It also handles switching between different pages.
+ */
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './pages/Login';

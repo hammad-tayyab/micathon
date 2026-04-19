@@ -14,6 +14,11 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 const SESSION_KEY = 'nighabaan_user_id';
 
+/**
+ * AuthProvider
+ * This is the "brain" for user sessions. It remembers who is logged in by saving their ID in the browser's memory.
+ * It provides a way to fetch the user's data from the database, log them in using their phone number, and log them out.
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // This function takes a phone number, checks if a user exists in the database, and logs them in.
   const login = async (phone: string): Promise<{ error: string | null }> => {
     const trimmed = phone.trim();
     const { data, error } = await supabase

@@ -34,6 +34,10 @@ interface StatusBadgeProps {
   size?: 'sm' | 'md';
 }
 
+/**
+ * StatusBadge Component
+ * A small pill-shaped label that visually shows what stage a job is in (e.g., "Active", "Funds Locked", "Completed").
+ */
 export function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {
   const config = statusConfig[status];
   const sizeClass = size === 'md' ? 'text-sm px-3 py-1.5 gap-1.5' : 'text-xs px-2 py-1 gap-1';

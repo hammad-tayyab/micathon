@@ -9,6 +9,12 @@ interface DashboardProps {
   navigate: (state: NavState) => void;
 }
 
+/**
+ * Dashboard Page
+ * The main screen the user sees after logging in.
+ * It fetches and displays the jobs related to the user (either jobs they created or jobs assigned to them).
+ * It also shows a quick summary of their wallet balance and locked escrow funds.
+ */
 export function Dashboard({ navigate }: DashboardProps) {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -16,6 +22,7 @@ export function Dashboard({ navigate }: DashboardProps) {
 
   const isHomeowner = user?.role === 'homeowner';
 
+  // This block runs automatically and fetches all jobs where the current user is either the homeowner or the worker.
   useEffect(() => {
     if (!user) return;
     const field = isHomeowner ? 'homeowner_id' : 'worker_id';

@@ -8,11 +8,17 @@ interface EnrichedTransaction extends Transaction {
   job?: Pick<Job, 'id' | 'title'>;
 }
 
+/**
+ * Wallet Page
+ * Shows the user their available balance and a history of all their money movements.
+ * This includes money locked for a job, money received from jobs, and platform fees.
+ */
 export function Wallet() {
   const { user, refreshUser } = useAuth();
   const [transactions, setTransactions] = useState<EnrichedTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Loads all financial transactions for the logged-in user from the database.
   useEffect(() => {
     if (!user) return;
     refreshUser();

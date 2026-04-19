@@ -7,6 +7,10 @@ interface NavbarProps {
   navigate: (state: NavState) => void;
 }
 
+/**
+ * Navbar Component
+ * The menu bar at the top of the screen. It let users see their name/role, navigate to their dashboard or wallet, and log out.
+ */
 export function Navbar({ current, navigate }: NavbarProps) {
   const { user, logout } = useAuth();
 

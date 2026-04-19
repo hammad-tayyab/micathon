@@ -13,6 +13,12 @@ interface JobDetailProps {
   navigate: (state: NavState) => void;
 }
 
+/**
+ * JobDetail Page
+ * This is the control center for a specific job.
+ * - Homeowners use this page to verify work and release the locked funds to the worker.
+ * - Workers use this page to see that their payment is secured and to leave a note when the job is done.
+ */
 export function JobDetail({ jobId, navigate }: JobDetailProps) {
   const { user, refreshUser } = useAuth();
   const [job, setJob] = useState<Job | null>(null);
@@ -41,6 +47,7 @@ export function JobDetail({ jobId, navigate }: JobDetailProps) {
   const isHomeowner = user?.id === job?.homeowner_id;
   const isWorker = user?.id === job?.worker_id;
 
+  // Called by the worker to notify the homeowner that the work is finished and money can be released.
   const handleRequestRelease = async () => {
     if (!user || !job) return;
     setActionLoading(true);
@@ -62,6 +69,7 @@ export function JobDetail({ jobId, navigate }: JobDetailProps) {
     setActionLoading(false);
   };
 
+  // Called by the homeowner. It officially moves the locked escrow money into the worker's wallet.
   const handleReleaseFunds = async () => {
     if (!user || !job) return;
     setActionLoading(true);

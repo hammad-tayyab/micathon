@@ -8,6 +8,10 @@ interface JobCardProps {
   navigate: (state: NavState) => void;
 }
 
+/**
+ * JobCard Component
+ * Displays a summary of a single job. When clicked, it takes the user to the detailed view of that job.
+ */
 export function JobCard({ job, navigate }: JobCardProps) {
   const counterpart = job.homeowner || job.worker;
 

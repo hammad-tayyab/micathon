@@ -156,20 +156,18 @@ Just **three steps** that transform strangers into trusted partners.
 
 ```
 nighabaan/
-├── 🖥️  frontend/          ← React + Vite (User-Facing App)
-│   ├── src/
-│   │   ├── components/   ← Reusable UI blocks
-│   │   ├── pages/        ← Route-level views
-│   │   └── hooks/        ← Custom React logic
-│   └── tailwind.config.js
+├── 🖥️  src/                        ← React App (TypeScript)
+│   ├── components/                ← Reusable UI blocks
+│   ├── pages/                     ← Route-level views
+│   └── hooks/                     ← Custom React logic
 │
-├── ⚙️  backend/           ← Express API + Business Logic
-│   ├── routes/           ← API endpoint definitions
-│   ├── middleware/        ← JWT auth guards
-│   ├── db/               ← SQLite schema & queries
-│   └── server.js         ← Entry point (Port 5000)
+├── 🗄️  supabase/migrations/        ← PostgreSQL schema (PL/pgSQL)
+│   └── 20260418235511_nighabaan_schema.sql
 │
-└── 📦  package.json       ← Concurrently config (one command, full stack)
+├── ⚙️  .bolt/config.json           ← Bolt.new scaffold config
+├── 🎨  tailwind.config.js          ← Styling config
+├── 📦  package.json                ← Dependencies
+└── 🔧  vite.config.ts              ← Build config
 ```
 
 <br/>
@@ -178,12 +176,13 @@ nighabaan/
 
 | Layer | Technology | The *Why* |
 |-------|-----------|-----------|
+| **Language** | TypeScript | Type-safe, catches bugs before runtime |
 | **Frontend** | React 18 + Vite | Lightning-fast HMR, component-driven, mobile-first |
 | **Styling** | Tailwind CSS | Utility-first — ships lean, looks sharp |
-| **Backend** | Node.js + Express | Minimal, battle-tested, handles real-time transactions cleanly |
-| **Database** | SQLite (`better-sqlite3`) | Zero-config, synchronous, perfect for rapid MVP iteration |
-| **Auth** | JWT (JSON Web Tokens) | Stateless — scales without session servers |
-| **Dev Workflow** | `concurrently` | One command spins the entire ecosystem |
+| **Backend & Auth** | Supabase | Managed Postgres + built-in auth + real-time — zero server setup |
+| **Database** | PostgreSQL (via Supabase) | Production-grade relational DB, handles escrow logic reliably |
+| **DB Migrations** | PL/pgSQL | Schema versioned and reproducible |
+| **Scaffolding** | Bolt.new | AI-assisted rapid prototyping |
 
 <br/>
 
@@ -215,51 +214,45 @@ npm >= 9.x
 
 ```bash
 # 1. Clone the vision
-git clone https://github.com/hammad-tayyab/nighabaan.git
-cd nighabaan
+git clone https://github.com/hammad-tayyab/micathon.git
+cd micathon
 
-# 2. Install everything in one go
-npm run install:all
+# 2. Install dependencies
+npm install
 ```
 
-### Launch the Full Stack
+### Launch
 
 ```bash
 npm run dev
 ```
 
-> Spins up:
-> - 🖥️  **Frontend** → `http://localhost:5173` (Vite)
-> - ⚙️  **Backend**  → `http://localhost:5000` (Express)
-
-Both run concurrently. One terminal. Zero ceremony.
+> 🖥️ **Frontend** → `http://localhost:5173` (Vite)
 
 <br/>
 
 ### Environment Variables
 
-Create a `.env` file in `/backend`:
+Create a `.env` file in the root:
 
 ```env
-JWT_SECRET=your_super_secret_key_here
-PORT=5000
-DB_PATH=./db/nighabaan.sqlite
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 <br/>
 
 ---
 
-## 📡 API Reference
+## 🗄️ Database Schema
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/api/auth/register` | ❌ | Register as homeowner or worker |
-| `POST` | `/api/auth/login` | ❌ | Get JWT token |
-| `POST` | `/api/jobs/create` | ✅ | Homeowner creates & funds a job |
-| `GET` | `/api/jobs/:id` | ✅ | Fetch job + escrow status |
-| `PATCH` | `/api/jobs/:id/release` | ✅ | Homeowner releases funds to worker |
-| `GET` | `/api/jobs/my` | ✅ | List all jobs for current user |
+Powered by Supabase (PostgreSQL). Migrations live in `supabase/migrations/`.
+
+| Table | Purpose |
+|-------|---------|
+| `users` | Homeowners & workers — role-based accounts |
+| `jobs` | Job listings with status (`pending`, `locked`, `released`) |
+| `escrow_transactions` | Payment lock/release audit trail |
 
 <br/>
 

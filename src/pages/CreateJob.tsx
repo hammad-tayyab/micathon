@@ -8,6 +8,11 @@ interface CreateJobProps {
   navigate: (state: NavState) => void;
 }
 
+/**
+ * CreateJob Page (For Homeowners)
+ * This page allows a homeowner to define a new job, select a worker, and specify the payment amount.
+ * When submitted, it takes the money out of the homeowner's wallet and locks it in a secure "escrow" system so the worker knows they will be paid.
+ */
 export function CreateJob({ navigate }: CreateJobProps) {
   const { user, refreshUser } = useAuth();
   const [workers, setWorkers] = useState<UserType[]>([]);
@@ -29,6 +34,7 @@ export function CreateJob({ navigate }: CreateJobProps) {
   const totalCharge = amount ? parseFloat(amount) * 1.01 : 0;
   const hasEnough = user ? user.balance_pkr >= totalCharge : false;
 
+  // Submits the job to the database, deducts the total from the homeowner's wallet, and moves it to locked funds (escrow)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !title || !amount || !workerId) return;

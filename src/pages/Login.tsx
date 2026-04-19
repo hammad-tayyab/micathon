@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { Shield, Phone, ArrowRight, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
+/**
+ * Login Page
+ * A simple screen where users can enter their phone number to access their account.
+ * For this demo, there are also "Quick Login" buttons to easily switch between a Homeowner and a Worker.
+ */
 export function Login() {
   const { login } = useAuth();
   const [phone, setPhone] = useState('');

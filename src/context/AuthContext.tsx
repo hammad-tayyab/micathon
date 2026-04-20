@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
-import { User } from '../types';
+import { User, UserRole } from '../types';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (phone: string) => Promise<{ error: string | null }>;
+  signIn: (phone: string) => Promise<{ error: string | null }>;
+  signUp: (name: string, phone: string, city: string, role: UserRole) => Promise<{ error: string | null }>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -16,8 +17,8 @@ const SESSION_KEY = 'nighabaan_user_id';
 
 /**
  * AuthProvider
- * This is the "brain" for user sessions. It remembers who is logged in by saving their ID in the browser's memory.
- * It provides a way to fetch the user's data from the database, log them in using their phone number, and log them out.
+ * Manages user session. Supports both Sign In (existing user by phone)
+ * and Sign Up (new user with name, phone, city, role). No OTP needed.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -52,8 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // This function takes a phone number, checks if a user exists in the database, and logs them in.
-  const login = async (phone: string): Promise<{ error: string | null }> => {
+  /** Sign in an existing user by phone number */
+  const signIn = async (phone: string): Promise<{ error: string | null }> => {
     const trimmed = phone.trim();
     const { data, error } = await supabase
       .from('users')
@@ -69,13 +70,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
+  /** Register a brand new user — no OTP, just insert and log in */
+  const signUp = async (
+    name: string,
+    phone: string,
+    city: string,
+    role: UserRole
+  ): Promise<{ error: string | null }> => {
+    const trimmedPhone = phone.trim();
+    const trimmedCity = city.trim().toLowerCase();
+    const trimmedName = name.trim();
+
+    if (!trimmedName || !trimmedPhone || !trimmedCity) {
+      return { error: 'Please fill in all fields.' };
+    }
+
+    // Check if phone already registered
+    const { data: existing } = await supabase
+      .from('users')
+      .select('id')
+      .eq('phone', trimmedPhone)
+      .maybeSingle();
+
+    if (existing) {
+      return { error: 'This phone number is already registered. Use Sign In instead.' };
+    }
+
+    // Insert new user
+    const { data, error } = await supabase
+      .from('users')
+      .insert({
+        name: trimmedName,
+        phone: trimmedPhone,
+        city: trimmedCity,
+        role,
+        balance_pkr: 0,
+      })
+      .select()
+      .single();
+
+    if (error || !data) {
+      return { error: 'Could not create account. Please try again.' };
+    }
+
+    localStorage.setItem(SESSION_KEY, data.id);
+    setUser(data as User);
+    return { error: null };
+  };
+
   const logout = () => {
     localStorage.removeItem(SESSION_KEY);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,31 +1,24 @@
-import { Lock, CheckCircle, Clock, AlertTriangle, Zap } from 'lucide-react';
+import { CheckCircle, Zap, UserCheck } from 'lucide-react';
 import { JobStatus } from '../types';
 
-const statusConfig: Record<JobStatus, { label: string; icon: React.ReactNode; classes: string }> = {
-  active: {
-    label: 'Active',
-    icon: <Zap size={12} />,
-    classes: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+const statusConfig: Record<JobStatus, { label: string; icon: React.ReactNode; bg: string; color: string }> = {
+  open: {
+    label: 'Open',
+    icon: <Zap size={11} />,
+    bg: 'var(--green-soft)',
+    color: 'var(--green)',
   },
-  funds_secured: {
-    label: 'Funds Locked',
-    icon: <Lock size={12} />,
-    classes: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
+  hired: {
+    label: 'Hired ✓',
+    icon: <UserCheck size={11} />,
+    bg: 'var(--indigo-soft)',
+    color: 'var(--indigo)',
   },
-  release_requested: {
-    label: 'Release Requested',
-    icon: <Clock size={12} />,
-    classes: 'bg-orange-500/20 text-orange-300 border border-orange-500/30',
-  },
-  completed: {
-    label: 'Completed',
-    icon: <CheckCircle size={12} />,
-    classes: 'bg-green-500/20 text-green-300 border border-green-500/30',
-  },
-  disputed: {
-    label: 'Disputed',
-    icon: <AlertTriangle size={12} />,
-    classes: 'bg-red-500/20 text-red-300 border border-red-500/30',
+  closed: {
+    label: 'Closed',
+    icon: <CheckCircle size={11} />,
+    bg: 'var(--bg-muted)',
+    color: 'var(--text-muted)',
   },
 };
 
@@ -34,15 +27,15 @@ interface StatusBadgeProps {
   size?: 'sm' | 'md';
 }
 
-/**
- * StatusBadge Component
- * A small pill-shaped label that visually shows what stage a job is in (e.g., "Active", "Funds Locked", "Completed").
- */
+/** A small colored pill showing the job's current status. */
 export function StatusBadge({ status, size = 'sm' }: StatusBadgeProps) {
-  const config = statusConfig[status];
-  const sizeClass = size === 'md' ? 'text-sm px-3 py-1.5 gap-1.5' : 'text-xs px-2 py-1 gap-1';
+  const config = statusConfig[status] ?? statusConfig.open;
+  const sizeClass = size === 'md' ? 'text-sm px-3 py-1.5 gap-1.5' : 'text-xs px-2.5 py-1 gap-1';
   return (
-    <span className={`inline-flex items-center rounded-full font-medium ${sizeClass} ${config.classes}`}>
+    <span
+      className={`inline-flex items-center rounded-full font-semibold ${sizeClass}`}
+      style={{ backgroundColor: config.bg, color: config.color }}
+    >
       {config.icon}
       {config.label}
     </span>

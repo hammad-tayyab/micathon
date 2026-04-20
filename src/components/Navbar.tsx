@@ -1,5 +1,6 @@
-import { LayoutDashboard, Wallet, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, Wallet, LogOut, Shield, Sun, Moon, MapPin, Plus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { NavState } from '../types';
 
 interface NavbarProps {
@@ -8,65 +9,135 @@ interface NavbarProps {
 }
 
 /**
- * Navbar Component
- * The menu bar at the top of the screen. It let users see their name/role, navigate to their dashboard or wallet, and log out.
+ * Navbar
+ * Fixed top bar with: logo, nav links (Home + Wallet), theme toggle, user info, logout.
+ * Owners also get a "Post Job" shortcut pill.
  */
 export function Navbar({ current, navigate }: NavbarProps) {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+
+  const isOwner = user?.role === 'owner';
+
+  const navBtn = (
+    page: NavState['page'],
+    icon: React.ReactNode,
+    label: string
+  ) => {
+    const active = current.page === page;
+    return (
+      <button
+        onClick={() => navigate({ page })}
+        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
+        style={{
+          backgroundColor: active ? 'var(--indigo-soft)' : 'transparent',
+          color: active ? 'var(--indigo)' : 'var(--text-secondary)',
+        }}
+      >
+        {icon}
+        <span className="hidden sm:inline">{label}</span>
+      </button>
+    );
+  };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0D1B2A]/95 backdrop-blur border-b border-[#1e3448]">
-      <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
+    <nav
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md"
+      style={{
+        backgroundColor: `color-mix(in srgb, var(--bg-surface) 92%, transparent)`,
+        borderBottom: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)',
+      }}
+    >
+      <div className="max-w-lg mx-auto px-4 h-16 flex items-center justify-between gap-3">
+
+        {/* ── Logo ── */}
         <button
           onClick={() => navigate({ page: 'dashboard' })}
-          className="flex items-center gap-2 group"
+          className="flex items-center gap-2 shrink-0"
         >
-          <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-            <Shield size={16} className="text-[#0D1B2A]" />
+          <div
+            className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm"
+            style={{ backgroundColor: 'var(--indigo)' }}
+          >
+            <Shield size={15} color="white" />
           </div>
-          <span className="font-bold text-white text-lg font-display">Nighabaan</span>
+          <div className="hidden xs:block">
+            <span
+              className="font-display font-bold text-base leading-none block"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              Nighabaan
+            </span>
+          </div>
         </button>
 
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => navigate({ page: 'dashboard' })}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              current.page === 'dashboard'
-                ? 'bg-amber-500/20 text-amber-400'
-                : 'text-slate-400 hover:text-white hover:bg-[#162233]'
-            }`}
-          >
-            <LayoutDashboard size={16} />
-            <span className="hidden sm:inline">Dashboard</span>
-          </button>
+        {/* ── Nav Links ── */}
+        <div className="flex items-center gap-0.5">
+          {navBtn('dashboard', <LayoutDashboard size={16} />, 'Home')}
+          {navBtn('wallet', <Wallet size={16} />, 'Wallet')}
 
-          <button
-            onClick={() => navigate({ page: 'wallet' })}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              current.page === 'wallet'
-                ? 'bg-amber-500/20 text-amber-400'
-                : 'text-slate-400 hover:text-white hover:bg-[#162233]'
-            }`}
-          >
-            <Wallet size={16} />
-            <span className="hidden sm:inline">Wallet</span>
-          </button>
-
-          <div className="w-px h-5 bg-[#1e3448] mx-1" />
-
-          <div className="flex items-center gap-2">
-            <div className="text-right hidden sm:block">
-              <p className="text-xs text-slate-400 leading-none">{user?.name}</p>
-              <p className="text-xs text-amber-500 capitalize leading-none mt-0.5">{user?.role}</p>
-            </div>
+          {/* Owner: quick post job */}
+          {isOwner && (
             <button
-              onClick={logout}
-              className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-              title="Logout"
+              onClick={() => navigate({ page: 'create-job' })}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all ml-1"
+              style={{
+                backgroundColor:
+                  current.page === 'create-job' ? 'var(--indigo-soft)' : 'var(--bg-muted)',
+                color:
+                  current.page === 'create-job' ? 'var(--indigo)' : 'var(--text-secondary)',
+                border: '1.5px solid var(--border)',
+              }}
             >
-              <LogOut size={16} />
+              <Plus size={15} />
+              <span className="hidden sm:inline">Post Job</span>
             </button>
-          </div>
+          )}
+        </div>
+
+        {/* ── Right Side ── */}
+        <div className="flex items-center gap-1 shrink-0">
+
+          {/* City badge */}
+          {user?.city && (
+            <div
+              className="hidden sm:flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full"
+              style={{
+                backgroundColor: 'var(--indigo-soft)',
+                color: 'var(--indigo)',
+              }}
+            >
+              <MapPin size={10} />
+              <span className="capitalize">{user.city}</span>
+            </div>
+          )}
+
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl transition-all"
+            style={{
+              color: 'var(--text-muted)',
+              backgroundColor: 'transparent',
+            }}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light'
+              ? <Moon size={16} />
+              : <Sun size={16} />
+            }
+          </button>
+
+          {/* Logout */}
+          <button
+            onClick={logout}
+            className="p-2 rounded-xl transition-all"
+            style={{ color: 'var(--text-muted)' }}
+            title="Logout"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </nav>

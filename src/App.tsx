@@ -1,11 +1,11 @@
 /**
- * App.tsx
- * This is the main starting point of the application.
- * It checks if the user is logged in. If they are, it shows the main dashboard.
- * If they are not, it shows the login screen. It also handles switching between different pages.
+ * App.tsx — Root of the application.
+ * Wraps everything in ThemeProvider + AuthProvider.
+ * Handles page routing based on `nav` state (no external router needed).
  */
 import { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { CreateJob } from './pages/CreateJob';
@@ -18,21 +18,35 @@ function AppInner() {
   const { user, loading } = useAuth();
   const [nav, setNav] = useState<NavState>({ page: 'dashboard' });
 
+  /* ── Loading splash ── */
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0D1B2A] flex items-center justify-center">
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: 'var(--bg-page)' }}
+      >
         <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-[#1e3448] border-t-amber-500 rounded-full animate-spin" />
-          <p className="text-slate-500 text-sm">Loading Nighabaan...</p>
+          <div
+            className="w-10 h-10 border-2 rounded-full animate-spin"
+            style={{
+              borderColor: 'var(--border)',
+              borderTopColor: 'var(--indigo)',
+            }}
+          />
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            Loading Nighabaan...
+          </p>
         </div>
       </div>
     );
   }
 
+  /* ── Not logged in → Login/Signup screen ── */
   if (!user) {
     return <Login />;
   }
 
+  /* ── Logged in → Main app ── */
   return (
     <>
       <Navbar current={nav} navigate={setNav} />
@@ -48,8 +62,10 @@ function AppInner() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppInner />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppInner />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

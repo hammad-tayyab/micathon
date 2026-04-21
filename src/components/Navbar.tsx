@@ -1,6 +1,5 @@
-import { LayoutDashboard, Wallet, LogOut, Shield, Sun, Moon, MapPin, Plus } from 'lucide-react';
+import { MapPin, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import { NavState } from '../types';
 
 interface NavbarProps {
@@ -8,135 +7,90 @@ interface NavbarProps {
   navigate: (state: NavState) => void;
 }
 
-/**
- * Navbar
- * Fixed top bar with: logo, nav links (Home + Wallet), theme toggle, user info, logout.
- * Owners also get a "Post Job" shortcut pill.
- */
 export function Navbar({ current, navigate }: NavbarProps) {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-
   const isOwner = user?.role === 'owner';
 
-  const navBtn = (
-    page: NavState['page'],
-    icon: React.ReactNode,
-    label: string
-  ) => {
+  const navBtn = (page: NavState['page'], label: string) => {
     const active = current.page === page;
     return (
       <button
         onClick={() => navigate({ page })}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
-        style={{
-          backgroundColor: active ? 'var(--indigo-soft)' : 'transparent',
-          color: active ? 'var(--indigo)' : 'var(--text-secondary)',
-        }}
+        className={`px-3 py-1.5 text-sm transition-all duration-300 tracking-wide font-medium ${
+          active 
+            ? 'text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]' 
+            : 'text-muted hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+        }`}
       >
-        {icon}
-        <span className="hidden sm:inline">{label}</span>
+        {label}
       </button>
     );
   };
 
   return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md"
-      style={{
-        backgroundColor: `color-mix(in srgb, var(--bg-surface) 92%, transparent)`,
-        borderBottom: '1px solid var(--border)',
-        boxShadow: 'var(--shadow-sm)',
-      }}
-    >
-      <div className="max-w-lg mx-auto px-4 h-16 flex items-center justify-between gap-3">
-
+    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#050505]/80 border-b border-white/5">
+      <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+        
         {/* ── Logo ── */}
         <button
           onClick={() => navigate({ page: 'dashboard' })}
-          className="flex items-center gap-2 shrink-0"
+          className="flex items-center gap-3 shrink-0 group"
         >
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center shadow-sm"
-            style={{ backgroundColor: 'var(--indigo)' }}
-          >
-            <Shield size={15} color="white" />
+          <div className="flex items-center justify-center group-hover:scale-105 transition-transform">
+            <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 2L38 12.3923V32.3923L20 42.7846L2 32.3923V12.3923L20 2Z" fill="transparent" stroke="#4F46E5" strokeWidth="1" strokeOpacity="1"/>
+              <path d="M12 28V12L28 28V12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
-          <div className="hidden xs:block">
-            <span
-              className="font-display font-bold text-base leading-none block"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Nighabaan
-            </span>
-          </div>
+          <span className="hidden xs:block font-display font-medium text-sm sub-tracking uppercase text-white">
+            Nighabaan
+          </span>
         </button>
 
         {/* ── Nav Links ── */}
-        <div className="flex items-center gap-0.5">
-          {navBtn('dashboard', <LayoutDashboard size={16} />, 'Home')}
-          {navBtn('wallet', <Wallet size={16} />, 'Wallet')}
-
-          {/* Owner: quick post job */}
-          {isOwner && (
-            <button
-              onClick={() => navigate({ page: 'create-job' })}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all ml-1"
-              style={{
-                backgroundColor:
-                  current.page === 'create-job' ? 'var(--indigo-soft)' : 'var(--bg-muted)',
-                color:
-                  current.page === 'create-job' ? 'var(--indigo)' : 'var(--text-secondary)',
-                border: '1.5px solid var(--border)',
-              }}
-            >
-              <Plus size={15} />
-              <span className="hidden sm:inline">Post Job</span>
-            </button>
-          )}
+        <div className="flex items-center gap-1">
+          {navBtn('dashboard', 'Marketplace')}
+          {navBtn('wallet', 'Wallet')}
+          <button
+            onClick={() => navigate({ page: 'dashboard' })}
+            className="px-3 py-1.5 text-sm transition-all duration-300 tracking-wide font-medium text-muted hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+          >
+            History
+          </button>
         </div>
 
         {/* ── Right Side ── */}
-        <div className="flex items-center gap-1 shrink-0">
-
-          {/* City badge */}
-          {user?.city && (
-            <div
-              className="hidden sm:flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full"
-              style={{
-                backgroundColor: 'var(--indigo-soft)',
-                color: 'var(--indigo)',
-              }}
+        <div className="flex items-center gap-3 shrink-0">
+          
+          {/* Post Job (Minimalist Outline) */}
+          {isOwner && (
+            <button
+              onClick={() => navigate({ page: 'create-job' })}
+              className={`px-4 py-1.5 text-xs tracking-widest font-medium uppercase rounded-full border transition-all ${
+                current.page === 'create-job'
+                  ? 'border-indigo-500 bg-indigo-500/10 text-white'
+                  : 'border-white/10 text-muted hover:border-white/30 hover:text-white'
+              }`}
             >
-              <MapPin size={10} />
+              Post
+            </button>
+          )}
+
+          {/* City */}
+          {user?.city && (
+            <div className="hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-1 text-muted border border-white/5 rounded-full">
+              <MapPin size={12} />
               <span className="capitalize">{user.city}</span>
             </div>
           )}
 
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-xl transition-all"
-            style={{
-              color: 'var(--text-muted)',
-              backgroundColor: 'transparent',
-            }}
-            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          >
-            {theme === 'light'
-              ? <Moon size={16} />
-              : <Sun size={16} />
-            }
-          </button>
-
           {/* Logout */}
           <button
             onClick={logout}
-            className="p-2 rounded-xl transition-all"
-            style={{ color: 'var(--text-muted)' }}
+            className="p-1.5 rounded-full transition-all text-muted hover:text-red-400 hover:bg-red-400/10"
             title="Logout"
           >
-            <LogOut size={16} />
+            <LogOut size={14} />
           </button>
         </div>
       </div>

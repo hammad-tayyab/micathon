@@ -10,13 +10,6 @@ interface JobCardProps {
   navigate?: (state: { page: 'job-detail'; jobId: string }) => void;
 }
 
-/**
- * JobCard Component
- * Has two visual variants:
- *   - Owner: shows job title, interested count, opens detail page on click
- *   - Worker: shows title, description, and an inline green Accept button
- *             After accepting it reveals the owner's phone number
- */
 export function JobCard({ job, onAccepted, navigate }: JobCardProps) {
   const { user } = useAuth();
   const isOwner = user?.role === 'owner';
@@ -65,161 +58,128 @@ export function JobCard({ job, onAccepted, navigate }: JobCardProps) {
     return (
       <button
         onClick={() => navigate?.({ page: 'job-detail', jobId: job.id })}
-        className="w-full text-left card p-4 hover:shadow-md transition-all group animate-fadeUp"
+        className="w-full text-left card p-5 hover:bg-white/5 transition-all group animate-fadeUp border-white/5 bg-transparent"
         style={{ cursor: navigate ? 'pointer' : 'default' }}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h3
-              className="font-semibold truncate mb-1"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {job.title}
-            </h3>
-            <p
-              className="text-sm line-clamp-1 mb-3"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              {job.description || 'No description'}
-            </p>
-            <div className="flex items-center justify-between">
-              <div
-                className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full"
-                style={{
-                  backgroundColor: 'var(--indigo-soft)',
-                  color: 'var(--indigo)',
-                }}
-              >
-                <Users size={12} />
-                {(job.accepted_by ?? []).length} interested
-              </div>
-              <span
-                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  job.status === 'open'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-500'
-                }`}
-                style={
-                  job.status === 'open'
-                    ? { backgroundColor: 'var(--green-soft)', color: 'var(--green)' }
-                    : { backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }
-                }
-              >
-                {job.status === 'open' ? 'Open' : job.status === 'hired' ? 'Hired ✓' : 'Closed'}
+            <div className="flex items-start justify-between mb-1.5">
+              <h3 className="font-semibold text-white truncate pr-4 text-base tracking-wide">
+                {job.title}
+              </h3>
+              <span className="text-[10px] uppercase tracking-widest text-muted/70 shrink-0 mt-1 whitespace-nowrap">
+                {timeAgo(job.created_at)}
               </span>
             </div>
             
-            {/* Added: Cash Amount Display for Owner */}
-            <div className="mt-2 flex items-center justify-end">
-               <span className="flex items-center gap-1 text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                 <Banknote size={14} style={{ color: 'var(--indigo)' }} />
-                 ₨ {(job.total_amount || 0).toLocaleString()}
-               </span>
+            <p className="text-sm line-clamp-1 mb-4 text-muted/80 leading-relaxed">
+              {job.description || 'No description'}
+            </p>
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400">
+                <Users size={12} />
+                {(job.accepted_by ?? []).length} interested
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="flex items-center gap-1 text-sm font-semibold text-white">
+                  <Banknote size={14} className="text-indigo-400" />
+                  ₨ {(job.total_amount || 0).toLocaleString()}
+                </span>
+                <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${
+                  job.status === 'open'
+                    ? 'bg-green-500/10 text-green-400'
+                    : 'bg-white/5 text-muted'
+                }`}>
+                  {job.status === 'open' ? 'Open' : job.status === 'hired' ? 'Hired ✓' : 'Closed'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-        <p
-          className="text-xs mt-3 text-right"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          {timeAgo(job.created_at)}
-        </p>
       </button>
     );
   }
 
   /* ── Worker View ── */
   return (
-    <div className="card p-4 animate-fadeUp">
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <h3
-          className="font-semibold text-base leading-snug"
-          style={{ color: 'var(--text-primary)' }}
-        >
+    <div className="card p-5 animate-fadeUp bg-transparent border-white/5">
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <h3 className="font-semibold text-lg leading-snug text-white tracking-wide">
           {job.title}
         </h3>
-        <span className="text-xs shrink-0 mt-0.5" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[10px] uppercase tracking-widest shrink-0 mt-1 text-muted/70">
           {timeAgo(job.created_at)}
         </span>
       </div>
 
       {job.description && (
-        <p
-          className="text-sm mb-3 line-clamp-2 leading-relaxed"
-          style={{ color: 'var(--text-secondary)' }}
-        >
+        <p className="text-sm mb-5 line-clamp-2 leading-relaxed text-muted">
           {job.description}
         </p>
       )}
       
-      {/* Added: Financials for Worker */}
-      <div className="flex flex-col gap-1 mb-4 p-3 rounded-xl bg-gray-50" style={{ backgroundColor: 'var(--bg-muted)' }}>
-        <div className="flex items-center justify-between text-xs" style={{ color: 'var(--text-secondary)' }}>
-          <span>Total Payment:</span>
+      {/* Financials for Worker */}
+      <div className="flex flex-col gap-1.5 mb-5 p-3 rounded-lg bg-white/5 border border-white/5">
+        <div className="flex items-center justify-between text-xs text-muted font-medium">
+          <span>Client Payment</span>
           <span>₨ {(job.total_amount || 0).toLocaleString()}</span>
         </div>
-        <div className="flex items-center justify-between font-bold text-sm" style={{ color: 'var(--green)' }}>
-          <span>You will Take Home:</span>
+        <div className="flex items-center justify-between font-bold text-sm text-green-400 pt-1 border-t border-white/5 mt-1 text-[13px]">
+          <span>You Earn</span>
           <span className="flex items-center gap-1">
              <Banknote size={14} /> 
              ₨ {((job.total_amount || 0) * 0.95).toLocaleString()}
           </span>
         </div>
-        <p className="text-[10px] text-right mt-1" style={{ color: 'var(--text-muted)' }}>(5% platform fee deducted)</p>
+        <p className="text-[10px] uppercase tracking-widest text-right mt-1 text-muted/50 font-medium">Minus 5% platform fee</p>
       </div>
 
-      <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
-        Posted by {job.owner?.name ?? 'Owner'}
-      </p>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-xs text-muted/80">
+          Posted by <span className="font-medium text-white">{job.owner?.name ?? 'Client'}</span>
+        </p>
+      </div>
 
       {/* Accept button or contact reveal */}
       {!accepted ? (
         <button
           onClick={handleAccept}
           disabled={accepting}
-          className="btn-accept w-full"
+          className="btn-accept w-full py-3 mt-1"
         >
           {accepting ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
             <>
               <CheckCircle size={18} />
-              Accept Job — قبول کریں
+              Accept Task
             </>
           )}
         </button>
       ) : (
-        <div
-          className="rounded-xl p-3 animate-popIn"
-          style={{
-            backgroundColor: 'var(--green-soft)',
-            border: '1.5px solid var(--green-border)',
-          }}
-        >
-          <p
-            className="text-xs font-semibold mb-2 flex items-center gap-1.5"
-            style={{ color: 'var(--green)' }}
-          >
-            <Check size={14} /> You accepted! Contact the owner:
+        <div className="rounded-xl p-4 animate-popIn bg-green-500/10 border border-green-500/20">
+          <p className="text-xs font-semibold mb-3 flex items-center gap-1.5 text-green-400 tracking-wide">
+            <Check size={14} /> You're hired! Contact client:
           </p>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Phone size={15} style={{ color: 'var(--green)' }} />
-              <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+              <Phone size={15} className="text-green-500" />
+              <span className="font-bold text-sm text-white tracking-widest">
                 {ownerPhone}
               </span>
             </div>
             <button
               onClick={copyPhone}
-              className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg transition-all"
-              style={{
-                backgroundColor: copied ? 'var(--green)' : 'var(--bg-surface)',
-                color: copied ? 'white' : 'var(--text-secondary)',
-                border: '1px solid var(--border)',
-              }}
+              className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all border ${
+                copied 
+                  ? 'bg-green-500 text-white border-green-500' 
+                  : 'bg-transparent text-muted border-white/10 hover:text-white hover:border-white/30'
+              }`}
             >
               {copied ? <Check size={12} /> : <Copy size={12} />}
-              {copied ? 'Copied!' : 'Copy'}
+              {copied ? 'Copied' : 'Copy'}
             </button>
           </div>
         </div>

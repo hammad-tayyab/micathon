@@ -9,12 +9,6 @@ interface TopUpRecord {
   created_at: string;
 }
 
-/**
- * Wallet Page
- * Shows the user's current balance and allows them to top it up.
- * Keeps a local list of top-up history fetched from the 'topups' table.
- * If the 'topups' table doesn't exist yet, it degrades gracefully.
- */
 export function Wallet() {
   const { user, refreshUser } = useAuth();
 
@@ -75,7 +69,7 @@ export function Wallet() {
       return;
     }
 
-    // 2. Record in topups table (optional — won't fail if table missing)
+    // 2. Record in topups table
     const { data: newRecord } = await supabase
       .from('topups')
       .insert({ user_id: user.id, amount: num })
@@ -124,69 +118,38 @@ export function Wallet() {
   const quickAmounts = [500, 1000, 2000, 5000];
 
   return (
-    <div
-      className="min-h-screen pt-20 pb-12 px-4"
-      style={{ backgroundColor: 'var(--bg-page)' }}
-    >
+    <div className="min-h-screen pt-20 pb-12 px-4 bg-page text-primary">
       <div className="max-w-lg mx-auto">
 
         {/* Header */}
-        <div className="mb-6">
-          <h1
-            className="text-2xl font-display font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
+        <div className="mb-8">
+          <h1 className="text-2xl font-display tracking-wide font-semibold text-white">
             My Wallet
           </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-sm mt-1 text-muted">
             میرا بیلنس — Your balance
           </p>
         </div>
 
         {/* ── Balance Card ── */}
-        <div
-          className="rounded-2xl p-6 mb-4 relative overflow-hidden animate-fadeUp"
-          style={{
-            background: 'linear-gradient(135deg, var(--indigo) 0%, #7C3AED 100%)',
-            boxShadow: '0 8px 32px rgba(79,70,229,0.3)',
-          }}
-        >
-          {/* Decorative circles */}
-          <div
-            className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10"
-            style={{ background: 'white', transform: 'translate(30%, -30%)' }}
-          />
-          <div
-            className="absolute bottom-0 left-0 w-24 h-24 rounded-full opacity-10"
-            style={{ background: 'white', transform: 'translate(-30%, 30%)' }}
-          />
-
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-3">
-              <WalletIcon size={16} color="rgba(255,255,255,0.8)" />
-              <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                Available Balance
-              </span>
+        <div className="rounded-xl p-8 mb-6 relative overflow-hidden animate-fadeUp bg-silk border border-white/10 shadow-lg">
+          <div className="relative z-10 flex flex-col gap-1">
+            <div className="flex items-center gap-2 mb-2 tracking-widest text-xs uppercase text-muted font-medium">
+              <WalletIcon size={16} />
+              <span>Available Balance</span>
             </div>
-            <p className="text-4xl font-display font-bold text-white mb-1">
+            <p className="text-5xl font-display font-medium text-white mb-2 tracking-tight">
               ₨ {(user?.balance_pkr ?? 0).toLocaleString()}
             </p>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
-              {user?.name} · {user?.phone}
+            <p className="text-sm font-medium text-muted/70 tracking-wide">
+              {user?.name} &nbsp;·&nbsp; {user?.phone}
             </p>
           </div>
         </div>
 
         {/* Success message */}
         {addedMsg && (
-          <div
-            className="flex items-center gap-2 text-sm rounded-xl px-4 py-3 mb-4 animate-popIn"
-            style={{
-              backgroundColor: 'var(--green-soft)',
-              color: 'var(--green)',
-              border: '1px solid var(--green-border)',
-            }}
-          >
+          <div className="flex items-center gap-2 text-sm rounded-lg px-4 py-3 mb-4 animate-popIn bg-green-500/10 text-green-400 border border-green-500/20">
             <Check size={16} />
             {addedMsg}
           </div>
@@ -194,31 +157,26 @@ export function Wallet() {
 
         {/* ── Add/Withdraw Buttons / Form ── */}
         {!showForm ? (
-          <div className="mb-6 space-y-3">
+          <div className="mb-10 space-y-3">
             {isOwner ? (
                <button
                  onClick={() => setShowForm(true)}
-                 className="btn-primary w-full flex items-center justify-center gap-2"
-                 style={{ backgroundColor: '#ed1c24' /* JazzCash Red */ }}
+                 className="btn-primary"
                >
-                 <span className="font-bold border border-white px-2 py-0.5 rounded text-xs bg-white text-[#ed1c24]">
-                   JazzCash
-                 </span>
-                 <Plus size={20} />
-                 Add Money (Top Up)
+                 <Plus size={18} />
+                 Top Up Balance
                </button>
             ) : (
                <button
                  onClick={handleWithdraw}
                  disabled={withdrawing || (user?.balance_pkr || 0) <= 0}
-                 className="btn-primary w-full flex items-center justify-center gap-2"
-                 style={{ backgroundColor: 'var(--green)' }}
+                 className="btn-accept"
                >
                  {withdrawing ? (
                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                  ) : (
                    <>
-                     <ArrowUpRight size={20} />
+                     <ArrowUpRight size={18} />
                      Withdraw via JazzCash
                    </>
                  )}
@@ -228,20 +186,16 @@ export function Wallet() {
         ) : (
           <form
             onSubmit={handleAddMoney}
-            className="card p-5 mb-6 animate-popIn space-y-4"
+            className="card p-6 mb-10 animate-popIn space-y-6"
           >
-            <div className="flex items-center justify-between mb-1">
-              <h2
-                className="font-bold"
-                style={{ color: 'var(--text-primary)' }}
-              >
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-white tracking-wide">
                 Add Funds
               </h2>
               <button
                 type="button"
                 onClick={() => { setShowForm(false); setFormError(''); setAmount(''); }}
-                className="text-sm font-medium"
-                style={{ color: 'var(--text-muted)' }}
+                className="text-xs font-semibold text-muted hover:text-white uppercase tracking-wider"
               >
                 Cancel
               </button>
@@ -249,21 +203,18 @@ export function Wallet() {
 
             {/* Quick amounts */}
             <div>
-              <p className="label mb-2">Quick select</p>
+              <p className="text-xs uppercase tracking-widest text-muted mb-3 font-medium">Quick select</p>
               <div className="grid grid-cols-4 gap-2">
                 {quickAmounts.map((q) => (
                   <button
                     key={q}
                     type="button"
                     onClick={() => setAmount(String(q))}
-                    className="rounded-xl py-2 text-sm font-semibold transition-all"
-                    style={{
-                      backgroundColor:
-                        amount === String(q) ? 'var(--indigo-soft)' : 'var(--bg-muted)',
-                      color:
-                        amount === String(q) ? 'var(--indigo)' : 'var(--text-secondary)',
-                      border: `1.5px solid ${amount === String(q) ? 'var(--indigo)' : 'var(--border)'}`,
-                    }}
+                    className={`rounded-lg py-2.5 text-sm font-medium transition-all border ${
+                      amount === String(q) 
+                      ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' 
+                      : 'border-white/5 bg-transparent text-muted hover:border-white/20 hover:text-white'
+                    }`}
                   >
                     ₨{q >= 1000 ? `${q / 1000}k` : q}
                   </button>
@@ -273,14 +224,7 @@ export function Wallet() {
 
             {/* Custom amount */}
             <div>
-              <label className="label" htmlFor="topup-amount">Or enter amount (PKR)</label>
-              <div className="relative">
-                <span
-                  className="absolute left-4 top-1/2 -translate-y-1/2 font-bold"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  ₨
-                </span>
+              <div className="floating-label-group mt-2">
                 <input
                   id="topup-amount"
                   type="number"
@@ -288,14 +232,18 @@ export function Wallet() {
                   max="1000000"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="0"
-                  className="input pl-9"
+                  placeholder=" "
+                  className="input pl-10"
                 />
+                <label htmlFor="topup-amount" className="left-10">Amount (PKR)</label>
+                <span className="absolute left-4 top-[55%] -translate-y-1/2 font-semibold text-muted pointer-events-none">
+                  ₨
+                </span>
               </div>
             </div>
 
             {formError && (
-              <p className="text-sm font-medium" style={{ color: 'var(--red)' }}>
+              <p className="text-sm font-medium text-red-400 bg-red-400/10 border border-red-400/20 px-3 py-2 rounded">
                 {formError}
               </p>
             )}
@@ -303,7 +251,7 @@ export function Wallet() {
             <button
               type="submit"
               disabled={adding || !amount || parseFloat(amount) <= 0}
-              className="btn-accept w-full"
+              className="btn-primary"
             >
               {adding ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -319,32 +267,22 @@ export function Wallet() {
 
         {/* ── Top-Up History ── */}
         <div>
-          <h2
-            className="text-xs font-bold uppercase tracking-wider mb-3"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            Top-Up History
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted mb-4">
+            Recent Activity
           </h2>
 
           {loadingHistory && (
             <div className="flex justify-center py-8">
-              <div
-                className="w-6 h-6 border-2 rounded-full animate-spin"
-                style={{ borderColor: 'var(--border)', borderTopColor: 'var(--indigo)' }}
-              />
+              <div className="w-5 h-5 border-2 border-white/10 border-t-indigo-500 rounded-full animate-spin" />
             </div>
           )}
 
           {!loadingHistory && topups.length === 0 && (
-            <div
-              className="card p-8 text-center"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <WalletIcon size={28} className="mx-auto mb-3" />
-              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                No top-ups yet
+            <div className="card border-dashed border-white/10 p-8 text-center bg-transparent">
+              <WalletIcon size={24} className="mx-auto mb-3 text-muted/50" />
+              <p className="text-sm font-medium text-muted">
+                No activity yet
               </p>
-              <p className="text-sm mt-1">Your deposits will appear here</p>
             </div>
           )}
 
@@ -352,33 +290,23 @@ export function Wallet() {
             {topups.map((tx) => (
               <div
                 key={tx.id}
-                className="card p-4 flex items-center gap-3 animate-fadeUp"
+                className="card p-4 flex items-center justify-between gap-4 animate-fadeUp bg-transparent border-white/5 hover:bg-white/5"
               >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: 'var(--green-soft)' }}
-                >
-                  <ArrowDownLeft size={16} style={{ color: 'var(--green)' }} />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-500/10 text-green-400 shrink-0">
+                    <ArrowDownLeft size={16} />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm text-white">Deposit</p>
+                    <p className="text-xs text-muted/70 uppercase tracking-wide mt-0.5">
+                      {new Date(tx.created_at).toLocaleDateString('en-PK', {
+                        day: 'numeric',
+                        month: 'short',
+                      })}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p
-                    className="font-semibold text-sm"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    Money Added
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {new Date(tx.created_at).toLocaleDateString('en-PK', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
-                <p
-                  className="font-bold text-base shrink-0"
-                  style={{ color: 'var(--green)' }}
-                >
+                <p className="font-semibold text-sm text-green-400">
                   + ₨ {tx.amount.toLocaleString()}
                 </p>
               </div>

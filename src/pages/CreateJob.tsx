@@ -8,11 +8,6 @@ interface CreateJobProps {
   navigate: (state: NavState) => void;
 }
 
-/**
- * CreateJob Page (Owners only)
- * Simple form: title + description. City is auto-filled from user profile.
- * No escrow, no amount, no worker selection — just post the job.
- */
 export function CreateJob({ navigate }: CreateJobProps) {
   const { user, refreshUser } = useAuth();
   const [title, setTitle] = useState('');
@@ -37,7 +32,6 @@ export function CreateJob({ navigate }: CreateJobProps) {
     setError('');
     setLoading(true);
 
-    // 1. Deduct balance from owner
     const newBalance = user.balance_pkr - numAmount;
     const { error: balErr } = await supabase
       .from('users')
@@ -50,14 +44,12 @@ export function CreateJob({ navigate }: CreateJobProps) {
       return;
     }
 
-    // 2. Insert Job
-
     const { data, error: jobErr } = await supabase
       .from('jobs')
       .insert({
         title: title.trim(),
         description: description.trim(),
-        city: user.city, // auto-filled from profile
+        city: user.city,
         homeowner_id: user.id,
         total_amount: numAmount,
         status: 'open',
@@ -67,7 +59,6 @@ export function CreateJob({ navigate }: CreateJobProps) {
       .single();
 
     if (jobErr || !data) {
-      // Rollback is ideal, but for MVP we inform the user
       setError('Could not post job. Please try again.');
       setLoading(false);
       return;
@@ -78,150 +69,104 @@ export function CreateJob({ navigate }: CreateJobProps) {
   };
 
   return (
-    <div
-      className="min-h-screen pt-20 pb-10 px-4"
-      style={{ backgroundColor: 'var(--bg-page)' }}
-    >
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen pt-24 pb-12 px-4 bg-page text-primary flex flex-col">
+      <div className="w-full max-w-lg mx-auto">
 
         {/* Back */}
         <button
           onClick={() => navigate({ page: 'dashboard' })}
-          className="flex items-center gap-2 text-sm font-medium mb-6 transition-colors"
-          style={{ color: 'var(--text-secondary)' }}
+          className="flex items-center gap-2 text-xs uppercase tracking-widest font-semibold mb-8 text-muted hover:text-white transition-colors"
         >
-          <ArrowLeft size={16} />
-          Back
+          <ArrowLeft size={14} />
+          Back to Marketplace
         </button>
 
         {/* Header */}
-        <div className="mb-6">
-          <h1
-            className="text-2xl font-display font-bold"
-            style={{ color: 'var(--text-primary)' }}
-          >
+        <div className="mb-8">
+          <h1 className="text-3xl font-display font-semibold tracking-wide text-white">
             Post a Job
           </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-sm mt-1 text-muted">
             نوکری پوسٹ کریں — Workers in your city will see this
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="card p-5 space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-fadeUp">
+          <div className="card p-6 space-y-6">
 
             {/* Job Title */}
-            <div>
-              <label className="label" htmlFor="job-title">
-                <span className="flex items-center gap-2">
-                  <FileText size={14} style={{ color: 'var(--indigo)' }} />
-                  Job Title — کام کا نام
-                </span>
-              </label>
+            <div className="floating-label-group">
               <input
                 id="job-title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Fix water pipe, Paint room, Repair gate"
-                className="input"
+                placeholder=" "
+                className="input pl-10"
                 required
                 autoFocus
               />
+              <label htmlFor="job-title" className="left-10 text-muted">Job Title</label>
+              <FileText size={18} className="absolute left-4 top-[55%] -translate-y-1/2 text-muted pointer-events-none" />
             </div>
 
             {/* Amount */}
             <div>
-              <label className="label" htmlFor="job-amount">
-                <span className="flex items-center gap-2">
-                  <Banknote size={14} style={{ color: 'var(--indigo)' }} />
-                  Job Payment — کل رقم (PKR)
-                </span>
-              </label>
-              <div className="relative">
-                <span
-                  className="absolute left-4 top-1/2 -translate-y-1/2 font-bold"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  ₨
-                </span>
+              <div className="floating-label-group">
                 <input
                   id="job-amount"
                   type="number"
                   min="1"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="e.g. 5000"
-                  className="input pl-9"
+                  placeholder=" "
+                  className="input pl-10"
                   required
                 />
+                <label htmlFor="job-amount" className="left-10 text-muted">Job Payment (PKR)</label>
+                <span className="absolute left-4 top-[55%] -translate-y-1/2 font-semibold text-muted pointer-events-none tracking-widest">
+                  ₨
+                </span>
               </div>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs mt-2 text-muted/70 tracking-wide leading-relaxed">
                 This amount will be locked from your wallet and given to the worker (minus 5% fee) when the job is done.
               </p>
             </div>
 
             {/* Description */}
-            <div>
-              <label className="label" htmlFor="job-desc">
-                <span className="flex items-center gap-2">
-                  <AlignLeft size={14} style={{ color: 'var(--indigo)' }} />
-                  Description — تفصیل (optional)
-                </span>
-              </label>
+            <div className="floating-label-group">
               <textarea
                 id="job-desc"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe what needs to be done..."
+                placeholder=" "
                 rows={4}
-                className="input resize-none"
-                style={{ height: 'auto' }}
+                className="input pl-10 resize-none min-h-[120px]"
               />
+              <label htmlFor="job-desc" className="left-10 top-6 -translate-y-0 text-muted bg-surface px-1">Description (Optional)</label>
+              <AlignLeft size={18} className="absolute left-4 top-5 text-muted pointer-events-none" />
             </div>
 
             {/* City (locked) */}
             <div>
-              <label className="label">
-                <span className="flex items-center gap-2">
-                  <MapPin size={14} style={{ color: 'var(--indigo)' }} />
-                  City — شہر
-                </span>
-              </label>
-              <div
-                className="input flex items-center gap-2 capitalize"
-                style={{
-                  color: 'var(--text-muted)',
-                  cursor: 'not-allowed',
-                  opacity: 0.8,
-                }}
-              >
-                <MapPin size={14} />
-                {user?.city}
-                <span className="ml-auto text-xs px-2 py-0.5 rounded-full"
-                  style={{
-                    backgroundColor: 'var(--indigo-soft)',
-                    color: 'var(--indigo)',
-                  }}
-                >
-                  Auto
+              <p className="text-xs uppercase tracking-widest text-muted mb-2 font-medium pl-1">Target City</p>
+              <div className="input flex items-center justify-between capitalize border-white/5 bg-transparent cursor-not-allowed">
+                <div className="flex items-center gap-2 text-muted">
+                  <MapPin size={16} />
+                  {user?.city}
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-indigo-500/10 text-indigo-400">
+                  Auto-locked
                 </span>
               </div>
-              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                Only workers in {user?.city} will see this job
+              <p className="text-xs mt-2 text-muted/70 tracking-wide leading-relaxed">
+                Only workers verified in {user?.city} will see this job.
               </p>
             </div>
           </div>
 
           {error && (
-            <p
-              className="text-sm rounded-xl px-4 py-3"
-              style={{
-                color: 'var(--red)',
-                backgroundColor: 'var(--red-soft)',
-                border: '1px solid var(--red)',
-              }}
-            >
+            <p className="text-sm px-4 py-3 text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg font-medium">
               {error}
             </p>
           )}
@@ -229,15 +174,14 @@ export function CreateJob({ navigate }: CreateJobProps) {
           <button
             type="submit"
             disabled={loading || !title.trim()}
-            className="btn-primary"
-            style={{ backgroundColor: 'var(--indigo)' }}
+            className="btn-primary py-4 text-base tracking-wide mt-2"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
                 <Send size={18} />
-                Post Job — نوکری پوسٹ کریں
+                Post Job
               </>
             )}
           </button>

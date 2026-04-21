@@ -64,7 +64,10 @@
   .font-display { font-family: 'Inter', sans-serif; letter-spacing: 0.05em; }
   .headline-tracking { letter-spacing: -0.02em; } /* Tight for huge display text */
   .sub-tracking { letter-spacing: 0.1em; text-transform: uppercase; }
+}
 
+/* ─── Components ────────────────────────────────────────────────── */
+@layer components {
   /* Premium Glassmorphic Minimalist Card */
   .card {
     background-color: var(--bg-surface);
@@ -114,7 +117,6 @@
   }
   .floating-label-group label {
     position: absolute;
-    left: 16px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);

@@ -35,14 +35,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshUser = async () => {
-    const id = localStorage.getItem(SESSION_KEY);
+    const id = sessionStorage.getItem(SESSION_KEY);
     if (!id) return;
     const u = await fetchUser(id);
     if (u) setUser(u);
   };
 
   useEffect(() => {
-    const id = localStorage.getItem(SESSION_KEY);
+    const id = sessionStorage.getItem(SESSION_KEY);
     if (id) {
       fetchUser(id).then((u) => {
         setUser(u);
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) return { error: 'Something went wrong. Please try again.' };
     if (!data) return { error: 'No account found with this phone number.' };
 
-    localStorage.setItem(SESSION_KEY, data.id);
+    sessionStorage.setItem(SESSION_KEY, data.id);
     setUser(data as User);
     return { error: null };
   };
@@ -113,13 +113,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: 'Could not create account. Please try again.' };
     }
 
-    localStorage.setItem(SESSION_KEY, data.id);
+    sessionStorage.setItem(SESSION_KEY, data.id);
     setUser(data as User);
     return { error: null };
   };
 
   const logout = () => {
-    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
     setUser(null);
   };
 

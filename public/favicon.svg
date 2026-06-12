@@ -1,0 +1,6 @@
+<svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background hexagon with indigo fill -->
+  <path d="M20 2L38 12.3923V32.3923L20 42.7846L2 32.3923V12.3923L20 2Z" fill="#4F46E5" stroke="#4F46E5" stroke-width="1"/>
+  <!-- "N" letterform in white -->
+  <path d="M12 28V12L28 28V12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

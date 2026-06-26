@@ -4,6 +4,7 @@
  * Handles page routing based on `nav` state (no external router needed).
  */
 import { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Login } from './pages/Login';
@@ -65,6 +66,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <AppInner />
+        <Analytics />
       </AuthProvider>
     </ThemeProvider>
   );
